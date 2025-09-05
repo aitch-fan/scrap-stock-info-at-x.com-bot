@@ -1,13 +1,45 @@
-# scrap-stock-info-at-x.com-bot
+# WritingBot 프로젝트 요약
 
+## 1. 프로젝트 개요
 
-You can set x.com pages to let this program to scrap stock info.
-Scraping is performed by Python Selenium.
-Once scraping process ends, it compares to local file that stacks what you had already scrap.
-If it is new information posting it sends information to gemini api.
-In this process you will use your own gemini api key so you have to prepare .env file.
-By using existing prompts (check the file and you can modify it by your own prompts), gemini sends info back to you in a summary form.
-Then you autonomously posts it to website. if you dont want to and just wants to stack in your local, you needs some edit.
+이 프로젝트는 특정 X.com 계정의 게시물을 자동으로 스크레이핑하여, Gemini AI로 내용을 가공한 뒤, 스크린샷과 함께 DCinside 갤러리에 포스팅하는 자동화 봇입니다. 모든 제어와 모니터링은 Tkinter 기반의 GUI를 통해 이루어집니다.
 
+## 2. 핵심 기능
 
-Thank you.
+- **자동 스크레이핑**: 지정된 X.com URL(`wallstengine`)의 최신 게시물 10개를 주기적으로 확인합니다.
+- **AI 콘텐츠 처리**: `prompt.txt`에 정의된 프롬프트를 기반으로 `gemini-2.5-flash` 모델을 사용하여 게시물 본문을 제목과 요약으로 가공합니다.
+- **자동 포스팅**: 가공된 제목과 본문, 그리고 원본 트윗의 스크린샷을 DCinside 글쓰기 페이지에 자동으로 게시합니다.
+- **중복 방지**: 처리한 게시물의 고유 ID를 `posted_history.txt`에 기록하여 중복 포스팅을 방지합니다.
+- **광고 필터링**: Gemini가 "광고입니다"라고 응답한 게시물은 자동으로 건너뜁니다.
+- **GUI 인터페이스**:
+    - 봇 시작/중지 및 즉시 확인 제어.
+    - 모든 작업 로그를 실시간으로 표시.
+    - 세션 동안 포스팅된 글 제목과 광고로 분류된 본문 내용을 확인하는 기능.
+    - 특정 URL을 수동으로 입력하여 처리하는 기능.
+- **안정성 및 편의성**:
+    - 오류 발생 시 60초 후 자동 재시작.
+    - 페이지 로드 실패 시 자동 재시도.
+    - 모든 대기 시간에 다음 작업과 남은 시간을 실시간으로 표시.
+    - DCinside 로그인 세션을 유지하여 반복 로그인 최소화.
+    - Stop 버튼에 즉각적으로 반응하는 향상된 스레드 제어.
+
+## 3. 프로젝트 구조
+
+- **`run_gui.py`**: GUI 애플리케이션을 실행하는 메인 진입점.
+- **`start_bot.bat`**: `run_gui.py`를 쉽게 실행하기 위한 Windows 배치 파일.
+- **`src/`**: 핵심 로직 디렉토리
+    - **`gui.py`**: Tkinter 기반의 메인 GUI 클래스.
+    - **`main.py`**: 자동화 봇의 메인 루프 및 단일 URL 처리 로직.
+    - **`scraper.py`**: Selenium을 사용하여 X.com 로그인 및 게시물 스크레이핑 담당.
+    - **`processor.py`**: Gemini API와 통신하여 텍스트 처리 담당.
+    - **`poster.py`**: Selenium을 사용하여 DCinside 로그인 및 게시물 포스팅 담당.
+    - **`utils.py`**: `graceful_wait` 등 공유 헬퍼 함수.
+- **설정 파일**:
+    - **`.env`**: X.com 및 DCinside 계정 정보, Gemini API 키 등 민감 정보 저장.
+    - **`prompt.txt`**: Gemini API에 전송할 프롬프트 템플릿.
+    - **`posted_history.txt`**: 이미 처리한 게시물 ID 목록.
+
+## 4. 실행 방법
+
+- **GUI 모드**: `start_bot.bat` 파일을 더블클릭하거나, 터미널에서 `python run_gui.py`를 실행합니다.
+- **CLI 모드 (기존)**: 터미널에서 `python src/main.py`를 실행합니다.
